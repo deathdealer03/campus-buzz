@@ -68,7 +68,33 @@ function optionalAuth(req, res, next) {
     next();
 }
 
+
+/**
+ * Role-based authorization middleware
+ * @param {Array} roles - List of allowed roles
+ */
+function authorizeRole(roles) {
+    return (req, res, next) => {
+        if (!req.user) {
+            return res.status(401).json({
+                success: false,
+                message: 'Unauthorized. Please login.'
+            });
+        }
+
+        if (roles.length && !roles.includes(req.user.role)) {
+            return res.status(403).json({
+                success: false,
+                message: 'Access denied. You do not have permission.'
+            });
+        }
+
+        next();
+    };
+}
+
 module.exports = {
     authenticateToken,
-    optionalAuth
+    optionalAuth,
+    authorizeRole
 };

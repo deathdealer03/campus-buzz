@@ -17,6 +17,7 @@ import NewsDetail from './pages/NewsDetail';
 import AdminPanel from './pages/AdminPanel';
 import AlumniPage from './pages/AlumniPage';
 import ClubsPage from './pages/ClubsPage';
+import ResearchPage from './pages/ResearchPage';
 
 
 function App() {
@@ -45,6 +46,7 @@ function App() {
                 <Route path="/news/:slug" element={<NewsDetail />} />
                 <Route path="/alumni" element={<AlumniPage />} />
                 <Route path="/clubs" element={<ClubsPage />} />
+                <Route path="/research" element={<ResearchPage />} />
 
 
                 {/* Protected Routes */}

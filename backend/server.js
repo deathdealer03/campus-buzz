@@ -50,11 +50,19 @@ app.get('/api/health', (req, res) => {
 });
 
 // API Routes
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/news', require('./routes/news'));
-app.use('/api/categories', require('./routes/categories'));
-app.use('/api/alumni', require('./routes/alumni'));
-app.use('/api/clubs', require('./routes/clubs'));
+const authRoutes = require('./routes/auth');
+const newsRoutes = require('./routes/news');
+const categoriesRoutes = require('./routes/categories'); // Keep existing categories route
+const alumniRoutes = require('./routes/alumni');
+const clubRoutes = require('./routes/clubs');
+const researchRoutes = require('./routes/research'); // New research route
+
+app.use('/api/auth', authRoutes);
+app.use('/api/news', newsRoutes);
+app.use('/api/categories', categoriesRoutes); // Use categories route
+app.use('/api/alumni', alumniRoutes);
+app.use('/api/clubs', clubRoutes);
+app.use('/api/research', researchRoutes); // Register research route
 
 
 // ==================== Error Handling ====================

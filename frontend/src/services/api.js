@@ -194,11 +194,29 @@ export const clubsAPI = {
     likePost: (postId) => apiRequest(`/clubs/posts/${postId}/like`, { method: 'POST' }),
 };
 
+export const researchAPI = {
+    // Research Papers
+    getAllResearch: () => apiRequest('/research/papers'),
+    createResearch: (data) => apiRequest('/research/papers', { method: 'POST', body: JSON.stringify(data) }),
+    citePaper: (id) => apiRequest(`/research/papers/${id}/cite`, { method: 'POST' }),
+    deleteResearch: (id) => apiRequest(`/research/papers/${id}`, { method: 'DELETE' }),
+
+    // Achievements
+    getAllAchievements: () => apiRequest('/research/achievements'),
+    createAchievement: (data) => apiRequest('/research/achievements', { method: 'POST', body: JSON.stringify(data) }),
+    congratulateAchievement: (id) => apiRequest(`/research/achievements/${id}/congratulate`, { method: 'POST' }),
+    deleteAchievement: (id) => apiRequest(`/research/achievements/${id}`, { method: 'DELETE' }),
+
+    // Leaderboard
+    getLeaderboard: () => apiRequest('/research/leaderboard'),
+};
+
 export default {
     auth: authAPI,
     news: newsAPI,
     categories: categoriesAPI,
     alumni: alumniAPI,
     clubs: clubsAPI,
+    research: researchAPI,
 };
 

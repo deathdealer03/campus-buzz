@@ -197,6 +197,39 @@ function createTables() {
         )
     `);
 
+    // Research Papers
+    db.exec(`
+        CREATE TABLE IF NOT EXISTS research_papers (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            abstract TEXT NOT NULL,
+            journal_conference TEXT NOT NULL,
+            publication_date DATE,
+            pdf_link TEXT,
+            citation_count INTEGER DEFAULT 0,
+            looking_for_assistants BOOLEAN DEFAULT 0,
+            author_id INTEGER NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    `);
+
+    // Student Achievements
+    db.exec(`
+        CREATE TABLE IF NOT EXISTS achievements (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            description TEXT NOT NULL,
+            date DATE,
+            verified_by_dept BOOLEAN DEFAULT 0,
+            image_url TEXT,
+            student_id INTEGER NOT NULL,
+            claps_count INTEGER DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    `);
+
     // Create indexes
     db.exec(`CREATE INDEX IF NOT EXISTS idx_news_category ON news(category_id)`);
     db.exec(`CREATE INDEX IF NOT EXISTS idx_news_author ON news(author_id)`);
@@ -206,6 +239,8 @@ function createTables() {
     db.exec(`CREATE INDEX IF NOT EXISTS idx_industry_posts_alumni ON industry_posts(alumni_id)`);
     db.exec(`CREATE INDEX IF NOT EXISTS idx_club_posts_club ON club_posts(club_id)`);
     db.exec(`CREATE INDEX IF NOT EXISTS idx_clubs_category ON clubs(category)`);
+    db.exec(`CREATE INDEX IF NOT EXISTS idx_research_author ON research_papers(author_id)`);
+    db.exec(`CREATE INDEX IF NOT EXISTS idx_achievements_student ON achievements(student_id)`);
 
     console.log('📋 Database tables created successfully');
 
@@ -491,6 +526,96 @@ function seedDefaultData() {
         `);
         clubPosts.forEach(p => insertPost.run(p));
         console.log('🏛 Sample clubs data inserted');
+    }
+
+    // Seed Research Papers
+    const researchCount = db.prepare('SELECT COUNT(*) as count FROM research_papers').get();
+    if (researchCount.count === 0) {
+        const admin = db.prepare('SELECT id FROM users WHERE role = ?').get('admin');
+        const faculty = db.prepare('SELECT id FROM users WHERE role = ?').get('faculty');
+
+        const researchData = [
+            {
+                title: 'AI-Driven Traffic Management System for Smart Cities',
+                abstract: 'This paper proposes a novel approach to urban traffic control using deep reinforcement learning. By analyzing real-time camera feeds, the system optimizes traffic light timings to reduce congestion by 22%.',
+                journal_conference: 'IEEE International Conference on Smart Cities 2024',
+                publication_date: '2024-05-12',
+                pdf_link: '#',
+                citation_count: 14,
+                looking_for_assistants: 1,
+                author_id: faculty.id
+            },
+            {
+                title: 'Quantum Cryptography: Securing the Future Internet',
+                abstract: 'An overview of post-quantum cryptographic algorithms and their implementation challenges in existing network infrastructure. We demonstrate a hybrid key exchange protocol resistant to quantum attacks.',
+                journal_conference: 'Journal of Network Security, Vol 12',
+                publication_date: '2023-11-20',
+                pdf_link: '#',
+                citation_count: 32,
+                looking_for_assistants: 0,
+                author_id: faculty.id
+            },
+            {
+                title: 'Sustainable Energy Harvesting from Piezoelectric Materials',
+                abstract: 'Investigating the efficiency of new polymer composites in harvesting energy from footfall traffic in university corridors. Preliminary results show a 15% increase in power output compared to traditional ceramics.',
+                journal_conference: 'Renewable Energy Summit 2024',
+                publication_date: '2024-02-15',
+                pdf_link: '#',
+                citation_count: 5,
+                looking_for_assistants: 1,
+                author_id: admin.id // Using admin as placeholder for another faculty
+            }
+        ];
+
+        const insertResearch = db.prepare(`
+            INSERT INTO research_papers (title, abstract, journal_conference, publication_date, pdf_link, citation_count, looking_for_assistants, author_id)
+            VALUES (@title, @abstract, @journal_conference, @publication_date, @pdf_link, @citation_count, @looking_for_assistants, @author_id)
+        `);
+        researchData.forEach(r => insertResearch.run(r));
+        console.log('🔬 Sample research papers inserted');
+    }
+
+    // Seed Student Achievements
+    const achCount = db.prepare('SELECT COUNT(*) as count FROM achievements').get();
+    if (achCount.count === 0) {
+        const student = db.prepare('SELECT id FROM users WHERE role = ?').get('student');
+
+        const achData = [
+            {
+                title: '1st Place at Smart India Hackathon 2024',
+                description: 'Developed "AgroTech," an AI-powered app for early plant disease detection. Competed against 500+ teams nationwide.',
+                date: '2024-08-15',
+                verified_by_dept: 1,
+                image_url: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=500',
+                student_id: student.id,
+                claps_count: 45
+            },
+            {
+                title: 'Google Summer of Code (GSoC) Mentor',
+                description: 'Selected as a mentor for the TensorFlow organization. Guided 2 students in implementing new optimization algorithms.',
+                date: '2024-06-01',
+                verified_by_dept: 1,
+                image_url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=500',
+                student_id: student.id,
+                claps_count: 32
+            },
+            {
+                title: 'Best Research Paper Award',
+                description: 'Awarded "Best Paper" at the National Conference on Student Research for work on "Blockchain in Supply Chain".',
+                date: '2023-12-10',
+                verified_by_dept: 0,
+                image_url: 'https://images.unsplash.com/photo-1590650516494-0c8e4a4dd67e?w=500',
+                student_id: student.id,
+                claps_count: 18
+            }
+        ];
+
+        const insertAch = db.prepare(`
+            INSERT INTO achievements (title, description, date, verified_by_dept, image_url, student_id, claps_count)
+            VALUES (@title, @description, @date, @verified_by_dept, @image_url, @student_id, @claps_count)
+        `);
+        achData.forEach(a => insertAch.run(a));
+        console.log('🏆 Sample student achievements inserted');
     }
 
     console.log('✅ Default data seeded successfully');

@@ -38,6 +38,9 @@ function Header() {
                     <NavLink to="/clubs" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
                         🏛️ Clubs
                     </NavLink>
+                    <NavLink to="/research" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+                        🔬 Research
+                    </NavLink>
                     {isStaff() && (
                         <NavLink to="/admin" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
                             Admin Panel
