@@ -735,8 +735,13 @@ const TABS = [
 ];
 
 
+import { useAuth } from '../context/AuthContext';
+
 function AlumniPage() {
+    const { isAdmin } = useAuth();
     const [activeTab, setActiveTab] = useState('spotlight');
+
+    const visibleTabs = TABS.filter(tab => tab.id !== 'edit' || isAdmin());
 
     return (
         <main className="main-content alumni-page">
@@ -765,7 +770,7 @@ function AlumniPage() {
 
                 {/* Tabs */}
                 <div className="alumni-tabs">
-                    {TABS.map(tab => (
+                    {visibleTabs.map(tab => (
                         <button
                             key={tab.id}
                             className={`alumni-tab-btn ${activeTab === tab.id ? 'active' : ''}`}
@@ -782,7 +787,7 @@ function AlumniPage() {
                     {activeTab === 'mentorship' && <MentorshipTab />}
                     {activeTab === 'newsfeed' && <NewsfeedTab />}
                     {activeTab === 'qa' && <QandATab />}
-                    {activeTab === 'edit' && <EditTab />}
+                    {isAdmin() && activeTab === 'edit' && <EditTab />}
                 </div>
             </div>
         </main>

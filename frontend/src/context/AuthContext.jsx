@@ -72,7 +72,7 @@ export function AuthProvider({ children }) {
 
     // Check if user has specific role
     function hasRole(...roles) {
-        return user && roles.includes(user.role);
+        return user && roles.some(r => user.role.toLowerCase() === r.toLowerCase());
     }
 
     // Check if user is admin or faculty (staff)

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { clubsAPI, alumniAPI } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 // ── Category config ──────────────────────────────────────────────────────────
 const CATEGORIES = [
@@ -31,6 +32,7 @@ function Toast({ msg, type, onClose }) {
 
 // ── Main ClubsPage Component ──────────────────────────────────────────────────
 export default function ClubsPage() {
+    const { isAdmin } = useAuth();
     const [activeTab, setActiveTab] = useState('browse');   // browse | edit
     const [clubs, setClubs] = useState([]);
     const [allPosts, setAllPosts] = useState([]);
@@ -148,7 +150,7 @@ export default function ClubsPage() {
                     { id: 'browse', label: '🔍 Browse Clubs' },
                     { id: 'feed', label: '📰 Activity Feed' },
                     { id: 'edit', label: '✏️ Edit / Manage' },
-                ].map(t => (
+                ].filter(t => t.id !== 'edit' || isAdmin()).map(t => (
                     <button key={t.id} className={`alumni-tab-btn ${activeTab === t.id ? 'active' : ''}`} onClick={() => setActiveTab(t.id)}>
                         {t.label}
                     </button>
@@ -237,7 +239,7 @@ export default function ClubsPage() {
                 )}
 
                 {/* ── EDIT TAB ── */}
-                {activeTab === 'edit' && (
+                {isAdmin() && activeTab === 'edit' && (
                     <div className="clubs-edit">
                         <div className="edit-section-header">
                             <h3>Manage Clubs &amp; Posts</h3>

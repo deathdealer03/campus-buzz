@@ -2424,14 +2424,11 @@ h6 {
 .clubs-hero-text h1 {
   font-size: 2.25rem;
   margin-bottom: 0.75rem;
-  background: linear-gradient(135deg, #00e5ff 0%, #42a5f5 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #ffffff;
 }
 
 .clubs-hero-text p {
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.9);
   max-width: 520px;
   font-size: 1rem;
   line-height: 1.7;
@@ -2839,6 +2836,17 @@ select:focus,
 .modal-close:hover {
   background: #e3eaf3 !important;
   color: var(--error) !important;
+}
+
+/* ── Logo Text Contrast Fix ── */
+.gradient-text {
+  background: linear-gradient(135deg, #ffffff 0%, #bbdefb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: white;
+  /* Fallback */
+  display: inline-block;
 }
 
 /* ── Light Theme Form Overrides ── */
