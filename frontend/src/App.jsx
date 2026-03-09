@@ -18,6 +18,7 @@ import AdminPanel from './pages/AdminPanel';
 import AlumniPage from './pages/AlumniPage';
 import ClubsPage from './pages/ClubsPage';
 import ResearchPage from './pages/ResearchPage';
+import CVGeneratorPage from './pages/CVGeneratorPage';
 
 
 function App() {
@@ -47,6 +48,7 @@ function App() {
                 <Route path="/alumni" element={<AlumniPage />} />
                 <Route path="/clubs" element={<ClubsPage />} />
                 <Route path="/research" element={<ResearchPage />} />
+                <Route path="/cv-generator" element={<CVGeneratorPage />} />
 
 
                 {/* Protected Routes */}
