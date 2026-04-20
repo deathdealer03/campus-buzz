@@ -19,6 +19,7 @@ import AlumniPage from './pages/AlumniPage';
 import ClubsPage from './pages/ClubsPage';
 import ResearchPage from './pages/ResearchPage';
 import CVGeneratorPage from './pages/CVGeneratorPage';
+import StudyBuddyPage from './pages/StudyBuddyPage';
 
 
 function App() {
@@ -49,6 +50,7 @@ function App() {
                 <Route path="/clubs" element={<ClubsPage />} />
                 <Route path="/research" element={<ResearchPage />} />
                 <Route path="/cv-generator" element={<CVGeneratorPage />} />
+                <Route path="/study-buddy" element={<StudyBuddyPage />} />
 
 
                 {/* Protected Routes */}

@@ -1,0 +1,90 @@
+# AI Study Buddy Feature — Implementation Plan
+
+Add a new "AI Study Buddy" page where students can upload a PDF (lecture notes, textbook chapters, etc.) and ask questions about the document. The Gemini API processes the PDF and answers questions based **only** on the uploaded content.
+
+## Architecture Overview
+
+```mermaid
+sequenceDiagram
+    participant Student as Student (Browser)
+    participant Frontend as React Frontend
+    participant Backend as Express Backend
+    participant Gemini as Gemini API
+
+    Student->>Frontend: Upload PDF + type question
+    Frontend->>Backend: POST /api/studybuddy/chat (multipart: pdf + question)
+    Backend->>Gemini: Send PDF bytes + prompt (Gemini File API)
+    Gemini-->>Backend: AI response (grounded in PDF)
+    Backend-->>Frontend: JSON { answer }
+    Frontend-->>Student: Display answer in chat UI
+```
+
+## Key Design Decisions
+
+> [!IMPORTANT]
+> **Client-side simplicity**: The PDF file is sent from the frontend to the backend on each chat request as a multipart upload. The backend forwards the raw PDF bytes to Gemini using its inline data capability. This avoids needing a database table or file-storage layer for uploaded PDFs — keeping the feature self-contained.
+
+> [!NOTE]
+> **Gemini model**: We'll use `gemini-2.0-flash` which natively supports PDF file inputs. The PDF is sent as base64-encoded inline data along with the user's question. The system prompt instructs the model to answer **only** from the document content.
+
+---
+
+## Proposed Changes
+
+### Backend
+
+#### [MODIFY] [.env](file:///d:/PROJECT%20MINOR/campus-buzz/backend/.env)
+- Add `GEMINI_API_KEY` environment variable.
+
+#### [NEW] [studybuddy.js](file:///d:/PROJECT%20MINOR/campus-buzz/backend/routes/studybuddy.js)
+- `POST /chat` — accepts multipart form data (PDF file + question + conversation history), calls Gemini API, returns AI answer.
+
+#### [NEW] [studyBuddyController.js](file:///d:/PROJECT%20MINOR/campus-buzz/backend/controllers/studyBuddyController.js)
+- `chat()` — validates inputs, reads the uploaded PDF buffer, base64-encodes it, sends it to `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent` along with a system prompt restricting answers to the document, returns the response.
+- Uses `multer` (memory storage) for PDF upload handling.
+- Sends conversation history to Gemini for multi-turn context.
+
+#### [MODIFY] [server.js](file:///d:/PROJECT%20MINOR/campus-buzz/backend/server.js)
+- Register the new `/api/studybuddy` route.
+- Add it to the startup banner.
+
+#### [MODIFY] [package.json](file:///d:/PROJECT%20MINOR/campus-buzz/backend/package.json)
+- Add `multer` dependency for multipart/form-data parsing.
+
+---
+
+### Frontend
+
+#### [NEW] [StudyBuddyPage.jsx](file:///d:/PROJECT%20MINOR/campus-buzz/frontend/src/pages/StudyBuddyPage.jsx)
+Full-page component with:
+1. **PDF Upload Zone** — drag-and-drop + click-to-browse with file info display, PDF icon animation.
+2. **Chat Interface** — scrollable message list (user & AI bubbles), auto-scroll, markdown-like formatting for AI responses.
+3. **Input Bar** — text input + send button, disabled until a PDF is uploaded.
+4. **Suggested Questions** — quick-start chips (e.g. "Summarize this document", "List key concepts").
+5. Premium design matching the existing UPES light-blue/white theme with glassmorphism, smooth animations, and micro-interactions.
+
+#### [MODIFY] [App.jsx](file:///d:/PROJECT%20MINOR/campus-buzz/frontend/src/App.jsx)
+- Import and add route for `/study-buddy`.
+
+#### [MODIFY] [Header.jsx](file:///d:/PROJECT%20MINOR/campus-buzz/frontend/src/components/Header.jsx)
+- Add "🤖 Study Buddy" nav link.
+
+#### [MODIFY] [api.js](file:///d:/PROJECT%20MINOR/campus-buzz/frontend/src/services/api.js)
+- Add `studyBuddyAPI.chat(formData)` — sends multipart form data (no JSON content-type override).
+
+#### [MODIFY] [index.css](file:///d:/PROJECT%20MINOR/campus-buzz/frontend/src/index.css)
+- Add Study Buddy page styles at the end of the file (upload zone, chat bubbles, animations, responsive).
+
+---
+
+## Verification Plan
+
+### Automated Tests
+- Start backend server (`npm start` in backend/) and verify `POST /api/studybuddy/chat` returns a valid response with a test PDF.
+
+### Manual Verification
+- Start both servers, navigate to `/study-buddy`.
+- Upload a sample PDF, ask a question, verify the AI responds with content from the document.
+- Test drag-and-drop upload, remove PDF, re-upload.
+- Test suggested question chips.
+- Verify responsive layout on different screen widths.

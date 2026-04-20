@@ -44,6 +44,9 @@ function Header() {
                     <NavLink to="/cv-generator" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
                         📝 CV Builder
                     </NavLink>
+                    <NavLink to="/study-buddy" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+                        🤖 Study Buddy
+                    </NavLink>
                     {isStaff() && (
                         <NavLink to="/admin" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
                             Admin Panel

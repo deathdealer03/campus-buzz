@@ -211,6 +211,38 @@ export const researchAPI = {
     getLeaderboard: () => apiRequest('/research/leaderboard'),
 };
 
+// ==================== Study Buddy API ====================
+
+export const studyBuddyAPI = {
+    /**
+     * Send a PDF + question to the AI Study Buddy
+     * @param {FormData} formData - must contain 'pdf' (File), 'question' (string), optional 'history' (JSON string)
+     */
+    chat: async (formData) => {
+        const token = getToken();
+        const headers = {};
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+        // Do NOT set Content-Type — browser sets multipart boundary automatically
+        try {
+            const response = await fetch(`${API_BASE_URL}/studybuddy/chat`, {
+                method: 'POST',
+                headers,
+                body: formData,
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message || 'Something went wrong');
+            }
+            return data;
+        } catch (error) {
+            console.error('Study Buddy API Error:', error);
+            throw error;
+        }
+    },
+};
+
 export default {
     auth: authAPI,
     news: newsAPI,
@@ -218,5 +250,6 @@ export default {
     alumni: alumniAPI,
     clubs: clubsAPI,
     research: researchAPI,
+    studyBuddy: studyBuddyAPI,
 };
 

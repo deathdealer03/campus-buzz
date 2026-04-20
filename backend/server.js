@@ -56,6 +56,7 @@ const categoriesRoutes = require('./routes/categories'); // Keep existing catego
 const alumniRoutes = require('./routes/alumni');
 const clubRoutes = require('./routes/clubs');
 const researchRoutes = require('./routes/research'); // New research route
+const studyBuddyRoutes = require('./routes/studybuddy'); // AI Study Buddy route
 
 app.use('/api/auth', authRoutes);
 app.use('/api/news', newsRoutes);
@@ -63,6 +64,7 @@ app.use('/api/categories', categoriesRoutes); // Use categories route
 app.use('/api/alumni', alumniRoutes);
 app.use('/api/clubs', clubRoutes);
 app.use('/api/research', researchRoutes); // Register research route
+app.use('/api/studybuddy', studyBuddyRoutes); // Register study buddy route
 
 
 // ==================== Error Handling ====================
@@ -100,6 +102,7 @@ const server = app.listen(PORT, () => {
 ║   - GET  /api/news             (Get all news)         ║
 ║   - GET  /api/news/prioritized (Get top news)         ║
 ║   - GET  /api/categories       (Get categories)       ║
+║   - POST /api/studybuddy/chat  (AI Study Buddy)       ║
 ║                                                       ║
 ╚═══════════════════════════════════════════════════════╝
     `);
