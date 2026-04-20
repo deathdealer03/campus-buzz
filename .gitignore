@@ -62,3 +62,8 @@ coverage/
 
 # macOS / Windows
 desktop.ini
+backend/.env
+backend/.env
+backend/database.sqlite
+backend/database.sqlite-shm
+backend/database.sqlite-wal
