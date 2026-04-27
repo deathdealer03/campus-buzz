@@ -4,7 +4,7 @@
  * Uses existing UPES light-blue/white campus-buzz theme
  */
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 
 // --- AI Polish Simulation ---
 const polishText = (text) => {
@@ -109,6 +109,12 @@ function CVGeneratorPage() {
     });
     const [polishing, setPolishing] = useState({});
     const previewRef = useRef(null);
+
+    // --- AI Review State ---
+    const [isReviewOpen, setIsReviewOpen] = useState(false);
+    const [isReviewLoading, setIsReviewLoading] = useState(false);
+    const [reviewData, setReviewData] = useState(null);
+    const [reviewError, setReviewError] = useState(null);
 
     // --- Section toggle ---
     const toggle = (section) =>
@@ -233,6 +239,78 @@ function CVGeneratorPage() {
         window.print();
     };
 
+    // --- AI CV Review ---
+    const handleGetAIReview = useCallback(async () => {
+        setIsReviewOpen(true);
+        setIsReviewLoading(true);
+        setReviewData(null);
+        setReviewError(null);
+
+        const eduText = data.education
+            .filter(e => e.institution)
+            .map(e => `${e.institution} – ${e.degree} (${e.startDate}–${e.endDate}) CGPA: ${e.cgpa}`)
+            .join('; ') || 'Not provided';
+
+        const skillsText = [
+            data.skills.languages && `Languages: ${data.skills.languages}`,
+            data.skills.frameworks && `Frameworks: ${data.skills.frameworks}`,
+            data.skills.databases && `Databases: ${data.skills.databases}`,
+            data.skills.tools && `Tools: ${data.skills.tools}`,
+        ].filter(Boolean).join(', ') || 'Not provided';
+
+        const expText = data.experience
+            .filter(e => e.title || e.company)
+            .map(e => `${e.title} at ${e.company} (${e.startDate}–${e.endDate})`)
+            .join('; ') || 'Not provided';
+
+        const projText = data.projects
+            .filter(p => p.name)
+            .map(p => `${p.name} (${p.techStack}): ${p.description}`)
+            .join('; ') || 'Not provided';
+
+        const certText = data.certifications
+            .filter(c => c.text)
+            .map(c => c.text)
+            .join('; ') || 'Not provided';
+
+        const prompt = `You are an expert HR recruiter reviewing a student CV for campus placements in India. Analyze this CV and respond ONLY in valid JSON with no extra text or markdown: { "score": number out of 100, "strengths": [array of strings], "improvements": [array of strings], "missing": [array of strings], "actions": [array of 5 strings] }. CV Data: Name: ${data.personal.name || 'Not provided'}, Education: ${eduText}, Skills: ${skillsText}, Experience: ${expText}, Projects: ${projText}, Certifications: ${certText}`;
+
+        try {
+            const res = await fetch(
+                `/api/cv/review`,
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt }),
+                }
+            );
+            if (!res.ok) throw new Error(`API error: ${res.status}`);
+            const json = await res.json();
+            
+            if (!json.success) throw new Error(json.message || 'API error');
+            
+            setReviewData(json.data);
+        } catch (err) {
+            console.error("AI Review Error:", err);
+            setReviewError(`Oops! Could not analyze your CV right now. Error: ${err.message}`);
+        } finally {
+            setIsReviewLoading(false);
+        }
+    }, [data]);
+
+    // --- Score ring helpers ---
+    const getScoreColor = (score) => {
+        if (score >= 75) return '#10b981';
+        if (score >= 50) return '#f59e0b';
+        return '#ef4444';
+    };
+    const getScoreLabel = (score) => {
+        if (score >= 80) return 'Excellent';
+        if (score >= 65) return 'Good';
+        if (score >= 50) return 'Average';
+        return 'Needs Work';
+    };
+
     return (
         <main className="main-content">
             <div className="cv-generator-page">
@@ -245,10 +323,133 @@ function CVGeneratorPage() {
                         </h1>
                         <p className="cv-page-subtitle">Build a professional, recruiter-ready resume in minutes</p>
                     </div>
-                    <button className="btn btn-primary cv-download-btn" onClick={handleDownload} id="cv-download-btn">
-                        📄 Download PDF
-                    </button>
+                    <div className="cv-toolbar-actions">
+                        <button
+                            className="btn cv-review-trigger-btn"
+                            onClick={handleGetAIReview}
+                            id="cv-ai-review-btn"
+                            disabled={isReviewLoading}
+                        >
+                            🤖 Get AI Review
+                        </button>
+                        <button className="btn btn-primary cv-download-btn" onClick={handleDownload} id="cv-download-btn">
+                            📄 Download PDF
+                        </button>
+                    </div>
                 </div>
+
+                {/* === AI Review Panel (slides from right) === */}
+                {isReviewOpen && (
+                    <div className="cv-review-overlay" onClick={() => setIsReviewOpen(false)} />
+                )}
+                <aside className={`cv-review-panel ${isReviewOpen ? 'open' : ''}`} id="cv-review-panel" aria-label="AI CV Review">
+                    <div className="cv-review-panel-header">
+                        <div className="cv-review-panel-title">
+                            <span>🤖</span>
+                            <span>AI CV Review</span>
+                        </div>
+                        <button className="cv-review-close" onClick={() => setIsReviewOpen(false)} aria-label="Close review panel">✕</button>
+                    </div>
+
+                    <div className="cv-review-panel-body">
+                        {isReviewLoading && (
+                            <div className="cv-review-loading">
+                                <div className="cv-review-spinner" />
+                                <p className="cv-review-loading-text">Analyzing your CV...</p>
+                                <p className="cv-review-loading-sub">Gemini AI is reviewing your details</p>
+                            </div>
+                        )}
+
+                        {reviewError && !isReviewLoading && (
+                            <div className="cv-review-error">
+                                <span className="cv-review-error-icon">⚠️</span>
+                                <p>{reviewError}</p>
+                                <button className="cv-review-retry-btn" onClick={handleGetAIReview}>Try Again</button>
+                            </div>
+                        )}
+
+                        {reviewData && !isReviewLoading && (() => {
+                            const score = reviewData.score ?? 0;
+                            const radius = 52;
+                            const circumference = 2 * Math.PI * radius;
+                            const offset = circumference - (score / 100) * circumference;
+                            const color = getScoreColor(score);
+                            return (
+                                <div className="cv-review-content">
+                                    {/* Score Ring */}
+                                    <div className="cv-review-score-section">
+                                        <svg className="cv-score-ring" viewBox="0 0 120 120" width="120" height="120">
+                                            <circle cx="60" cy="60" r={radius} fill="none" stroke="#e3ecf7" strokeWidth="10" />
+                                            <circle
+                                                cx="60" cy="60" r={radius}
+                                                fill="none"
+                                                stroke={color}
+                                                strokeWidth="10"
+                                                strokeDasharray={circumference}
+                                                strokeDashoffset={offset}
+                                                strokeLinecap="round"
+                                                transform="rotate(-90 60 60)"
+                                                style={{ transition: 'stroke-dashoffset 1s ease' }}
+                                            />
+                                            <text x="60" y="55" textAnchor="middle" fontSize="22" fontWeight="800" fill={color}>{score}</text>
+                                            <text x="60" y="72" textAnchor="middle" fontSize="10" fill="#7fa8cc">/100</text>
+                                        </svg>
+                                        <div className="cv-score-label" style={{ color }}>{getScoreLabel(score)}</div>
+                                        <div className="cv-score-sublabel">Overall CV Score</div>
+                                    </div>
+
+                                    {/* Strengths */}
+                                    {reviewData.strengths?.length > 0 && (
+                                        <div className="cv-review-section">
+                                            <h3 className="cv-review-section-title strength">✅ Strengths</h3>
+                                            <ul className="cv-review-list">
+                                                {reviewData.strengths.map((s, i) => (
+                                                    <li key={i} className="cv-review-item strength-item">{s}</li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+
+                                    {/* Improvements */}
+                                    {reviewData.improvements?.length > 0 && (
+                                        <div className="cv-review-section">
+                                            <h3 className="cv-review-section-title improvement">⚠️ Improvements Needed</h3>
+                                            <ul className="cv-review-list">
+                                                {reviewData.improvements.map((s, i) => (
+                                                    <li key={i} className="cv-review-item improvement-item">{s}</li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+
+                                    {/* Missing Sections */}
+                                    {reviewData.missing?.length > 0 && (
+                                        <div className="cv-review-section">
+                                            <h3 className="cv-review-section-title missing">❌ Missing Sections</h3>
+                                            <ul className="cv-review-list">
+                                                {reviewData.missing.map((s, i) => (
+                                                    <li key={i} className="cv-review-item missing-item">{s}</li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+
+                                    {/* Action Items */}
+                                    {reviewData.actions?.length > 0 && (
+                                        <div className="cv-review-section">
+                                            <h3 className="cv-review-section-title action">🚀 Action Items</h3>
+                                            <ol className="cv-review-list cv-review-ordered">
+                                                {reviewData.actions.map((s, i) => (
+                                                    <li key={i} className="cv-review-item action-item">{s}</li>
+                                                ))}
+                                            </ol>
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })()}
+                    </div>
+                </aside>
 
                 <div className="cv-layout">
                     {/* ===== LEFT SIDEBAR ===== */}

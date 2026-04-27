@@ -5,9 +5,11 @@
 
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 function Header() {
     const { user, logout, isStaff, isAdmin } = useAuth();
+    const { theme, toggleTheme } = useTheme();
     const navigate = useNavigate();
 
     const handleLogout = () => {
@@ -57,6 +59,14 @@ function Header() {
 
                 {/* User Actions */}
                 <div className="header-actions">
+                    <button 
+                        onClick={toggleTheme} 
+                        className="btn btn-icon theme-toggle" 
+                        title={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`}
+                        style={{ fontSize: '1.25rem', padding: '0.25rem', background: 'transparent', transition: 'transform 0.3s' }}
+                    >
+                        {theme === 'dark' ? '🌙' : '☀️'}
+                    </button>
                     {user ? (
                         <div className="user-menu" onClick={handleLogout} title="Click to logout">
                             <div className="user-avatar">

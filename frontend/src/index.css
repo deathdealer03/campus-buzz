@@ -3896,8 +3896,355 @@ select:focus,
   }
 }
 
+/* ===========================
+   AI REVIEW — Toolbar Actions
+   =========================== */
+.cv-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.cv-review-trigger-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.7rem 1.4rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, #1565c0 0%, #0288d1 100%);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  box-shadow: 0 2px 12px rgba(21, 101, 192, 0.28);
+  transition: all var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+}
+
+.cv-review-trigger-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.cv-review-trigger-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(21, 101, 192, 0.38);
+}
+
+.cv-review-trigger-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ===========================
+   AI REVIEW — Overlay
+   =========================== */
+.cv-review-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(13, 37, 64, 0.35);
+  backdrop-filter: blur(2px);
+  z-index: 1199;
+  animation: fadeIn 0.25s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ===========================
+   AI REVIEW — Sliding Panel
+   =========================== */
+.cv-review-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 420px;
+  max-width: 95vw;
+  background: #fff;
+  border-left: 1px solid var(--gray-200);
+  box-shadow: -8px 0 40px rgba(13, 37, 64, 0.14);
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: var(--radius-xl) 0 0 var(--radius-xl);
+}
+
+.cv-review-panel.open {
+  transform: translateX(0);
+}
+
+/* Panel header */
+.cv-review-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.1rem 1.5rem;
+  background: linear-gradient(135deg, #1565c0 0%, #0288d1 100%);
+  border-radius: var(--radius-xl) 0 0 0;
+  flex-shrink: 0;
+}
+
+.cv-review-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 0.01em;
+}
+
+.cv-review-close {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  background: rgba(255,255,255,0.18);
+  color: #fff;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+  transition: background var(--transition-fast);
+}
+
+.cv-review-close:hover {
+  background: rgba(255,255,255,0.32);
+}
+
+/* Panel body */
+.cv-review-panel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+  scroll-behavior: smooth;
+}
+
+.cv-review-panel-body::-webkit-scrollbar { width: 5px; }
+.cv-review-panel-body::-webkit-scrollbar-track { background: var(--gray-100); border-radius: 10px; }
+.cv-review-panel-body::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 10px; }
+
+/* ===========================
+   AI REVIEW — Loading State
+   =========================== */
+.cv-review-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 3rem 1rem;
+}
+
+.cv-review-spinner {
+  width: 52px;
+  height: 52px;
+  border: 5px solid var(--gray-200);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.cv-review-loading-text {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.cv-review-loading-sub {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: -0.5rem;
+}
+
+/* ===========================
+   AI REVIEW — Error State
+   =========================== */
+.cv-review-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 2rem 1rem;
+  text-align: center;
+  background: rgba(239, 68, 68, 0.05);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: var(--radius-lg);
+}
+
+.cv-review-error-icon {
+  font-size: 2rem;
+}
+
+.cv-review-error p {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.cv-review-retry-btn {
+  padding: 0.55rem 1.25rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--primary);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.cv-review-retry-btn:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+}
+
+/* ===========================
+   AI REVIEW — Score Ring
+   =========================== */
+.cv-review-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.cv-review-score-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 1.5rem 1rem;
+  background: linear-gradient(135deg, #f0f5fb 0%, #e3ecf7 100%);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--gray-200);
+}
+
+.cv-score-ring {
+  filter: drop-shadow(0 4px 12px rgba(21, 101, 192, 0.2));
+}
+
+.cv-score-label {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+.cv-score-sublabel {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* ===========================
+   AI REVIEW — Review Sections
+   =========================== */
+.cv-review-section {
+  background: var(--bg-card);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.1rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.cv-review-section-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.cv-review-section-title.strength  { color: #059669; }
+.cv-review-section-title.improvement { color: #d97706; }
+.cv-review-section-title.missing   { color: #dc2626; }
+.cv-review-section-title.action    { color: var(--primary); }
+
+.cv-review-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding-left: 0;
+}
+
+.cv-review-ordered {
+  padding-left: 1.2rem;
+}
+
+.cv-review-item {
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  padding: 0.45rem 0.7rem;
+  border-radius: var(--radius-sm);
+}
+
+.strength-item {
+  background: rgba(16, 185, 129, 0.06);
+  border-left: 3px solid #10b981;
+}
+
+.improvement-item {
+  background: rgba(245, 158, 11, 0.06);
+  border-left: 3px solid #f59e0b;
+}
+
+.missing-item {
+  background: rgba(239, 68, 68, 0.06);
+  border-left: 3px solid #ef4444;
+}
+
+.action-item {
+  background: rgba(21, 101, 192, 0.05);
+  border-left: 3px solid var(--primary);
+}
+
+/* Print — hide panel & overlay */
+@media print {
+  .cv-review-panel,
+  .cv-review-overlay,
+  .cv-review-trigger-btn { display: none !important; }
+}
+
+/* ===========================
+   AI REVIEW — Responsive
+   =========================== */
+@media (max-width: 600px) {
+  .cv-review-panel {
+    width: 100vw;
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    top: auto;
+    height: 85vh;
+    transform: translateY(100%);
+  }
+  .cv-review-panel.open {
+    transform: translateY(0);
+  }
+  .cv-review-panel-header {
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  }
+}
+
 /* ==========================================================
    STUDY BUDDY — AI PDF Q&A Page
+
    ========================================================== */
 
 /* Page layout */

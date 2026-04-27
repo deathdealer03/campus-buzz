@@ -7,6 +7,7 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import Header from './components/Header';
 import PrivateRoute from './components/PrivateRoute';
+import CampusBot from './components/CampusBot';
 
 // Pages
 import Login from './pages/Login';
@@ -77,6 +78,9 @@ function App() {
                     </main>
                 } />
             </Routes>
+
+            {/* Persistent Floating ChatBot */}
+            <CampusBot />
         </div>
     );
 }

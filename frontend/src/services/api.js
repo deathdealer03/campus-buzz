@@ -243,6 +243,16 @@ export const studyBuddyAPI = {
     },
 };
 
+// ==================== CampusBot API ====================
+
+export const chatBotAPI = {
+    sendMessage: (data) =>
+        apiRequest('/chatbot', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        }),
+};
+
 export default {
     auth: authAPI,
     news: newsAPI,
@@ -251,5 +261,6 @@ export default {
     clubs: clubsAPI,
     research: researchAPI,
     studyBuddy: studyBuddyAPI,
+    chatBot: chatBotAPI,
 };
 

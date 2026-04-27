@@ -55,8 +55,10 @@ const newsRoutes = require('./routes/news');
 const categoriesRoutes = require('./routes/categories'); // Keep existing categories route
 const alumniRoutes = require('./routes/alumni');
 const clubRoutes = require('./routes/clubs');
-const researchRoutes = require('./routes/research'); // New research route
+const researchRoutes = require('./routes/research'); // Register research route
 const studyBuddyRoutes = require('./routes/studybuddy'); // AI Study Buddy route
+const chatbotRoutes = require('./routes/chatbot'); // CampusBot route
+const cvReviewRoutes = require('./routes/cvReview'); // CV Review route
 
 app.use('/api/auth', authRoutes);
 app.use('/api/news', newsRoutes);
@@ -65,7 +67,8 @@ app.use('/api/alumni', alumniRoutes);
 app.use('/api/clubs', clubRoutes);
 app.use('/api/research', researchRoutes); // Register research route
 app.use('/api/studybuddy', studyBuddyRoutes); // Register study buddy route
-
+app.use('/api/chatbot', chatbotRoutes); // Register chatbot route
+app.use('/api/cv', cvReviewRoutes); // Register cv review route
 
 // ==================== Error Handling ====================
 
